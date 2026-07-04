@@ -25,6 +25,9 @@ Coloca la caja en el laboratorio o una oficina cerrada, conectada al UPS y por c
 
 ## 2. Sistema operativo
 
+> Guía detallada de instalación (flashear USB, BIOS de la M910q, instalador paso a
+> paso y primer SSH): **[`bin/ubuntu-install.md`](ubuntu-install.md)**.
+
 1. Instala **Ubuntu Server LTS** (24.04) — sin entorno gráfico, headless.
 2. Durante la instalación crea un usuario (p. ej. `beerlab`) y habilita **OpenSSH**.
 3. Actualiza y habilita actualizaciones de seguridad automáticas:
