@@ -40,22 +40,38 @@ Coloca la caja en el laboratorio o una oficina cerrada, conectada al UPS y por c
 
 ---
 
-## 3. Docker
+## 3. Docker + arranque en un comando
 
-```bash
-sudo apt -y install docker.io docker-compose-v2 git
-sudo systemctl enable --now docker      # arranca solo al encender la caja
-sudo usermod -aG docker $USER           # cierra sesión y vuelve a entrar
-```
-
-Clona este repositorio (por ejemplo en `/opt`):
+Clona este repositorio (por ejemplo en `/opt`) y corre el script de arranque:
 
 ```bash
 sudo mkdir -p /opt && sudo chown $USER /opt
 cd /opt
 git clone https://github.com/ecastrom/orsee-tec.git
 cd orsee-tec
+bash bin/bootstrap.sh
 ```
+
+`bin/bootstrap.sh` es idempotente y hace todo lo tedioso: instala Docker y el
+plugin de compose, habilita Docker al encender la caja, crea `.env` con
+contraseñas de base de datos aleatorias y fuertes, construye e inicia el stack
+(ORSEE + MySQL + cron) e instala el cron de respaldo nocturno. Al terminar
+imprime la URL local y los siguientes pasos.
+
+Después solo faltan los secretos que el script no puede adivinar: el dominio
+público / token de Cloudflare Tunnel (§5–§6) y el SMTP para enviar correo — se
+editan en `.env`. Los pasos manuales equivalentes están abajo por si prefieres
+hacerlo a mano.
+
+<details>
+<summary>Instalación manual de Docker (equivalente, sin el script)</summary>
+
+```bash
+sudo apt -y install docker.io docker-compose-v2 git
+sudo systemctl enable --now docker      # arranca solo al encender la caja
+sudo usermod -aG docker $USER           # cierra sesión y vuelve a entrar
+```
+</details>
 
 ---
 
