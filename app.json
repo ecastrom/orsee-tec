@@ -1,0 +1,67 @@
+{
+    "name": "ORSEE - BEER Lab Tec de Monterrey",
+    "description": "ORSEE 3.4.0 subject-pool recruitment & session scheduling for the Behavioral & Experimental Economics Research Lab (BEER Lab), Tecnologico de Monterrey.",
+    "repository": "https://github.com/ecastrom/orsee-tec",
+    "keywords": ["php", "orsee", "experimental-economics", "recruitment", "tec-de-monterrey"],
+    "website": "https://www.orsee.org",
+    "stack": "heroku-22",
+    "buildpacks": [
+        { "url": "heroku/php" }
+    ],
+    "formation": {
+        "web": { "quantity": 1, "size": "basic" }
+    },
+    "addons": [
+        { "plan": "jawsdb:kitefin" }
+    ],
+    "env": {
+        "ORSEE_SERVER_PROTOCOL": {
+            "description": "Public protocol. Leave as https:// on Heroku (TLS terminates at the router).",
+            "value": "https://"
+        },
+        "ORSEE_SERVER_URL": {
+            "description": "Public host with NO protocol and NO trailing slash, e.g. myapp.herokuapp.com or lab.tec.mx. If left blank ORSEE falls back to the incoming Host header.",
+            "required": false
+        },
+        "ORSEE_ROOT_DIRECTORY": {
+            "description": "URL sub-path where ORSEE is mounted. Keep empty: the web root already points at orsee/.",
+            "value": ""
+        },
+        "ORSEE_TIMEZONE": {
+            "description": "PHP timezone for session scheduling.",
+            "value": "America/Monterrey"
+        },
+        "ORSEE_MAIL_TRANSPORT": {
+            "description": "Use 'phpmailer' on Heroku (dynos have no local MTA). 'mail' only works where PHP mail() is wired to an MTA.",
+            "value": "phpmailer"
+        },
+        "ORSEE_SMTP_HOST": {
+            "description": "SMTP relay host for outgoing email (e.g. smtp.sendgrid.net, or your Tec relay).",
+            "value": "smtp.sendgrid.net"
+        },
+        "ORSEE_SMTP_PORT": {
+            "description": "SMTP port.",
+            "value": "587"
+        },
+        "ORSEE_SMTP_SECURE": {
+            "description": "SMTP encryption: tls, ssl, or empty.",
+            "value": "tls"
+        },
+        "ORSEE_SMTP_USER": {
+            "description": "SMTP username (for SendGrid this is literally 'apikey').",
+            "required": false
+        },
+        "ORSEE_SMTP_PASS": {
+            "description": "SMTP password / API key. Set as a config var; never commit it.",
+            "required": false
+        }
+    },
+    "environments": {
+        "test": {
+            "addons": ["jawsdb:kitefin"],
+            "scripts": {
+                "test": "php -l orsee/config/settings.php"
+            }
+        }
+    }
+}

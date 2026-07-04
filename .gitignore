@@ -1,0 +1,13 @@
+# Local environment / secrets — never commit.
+.env
+*.env.local
+
+# Composer install output (Heroku runs its own install; we only track the lock).
+/vendor/
+
+# OS / editor cruft.
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

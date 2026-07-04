@@ -1,0 +1,6 @@
+# In this deployment config/settings.php is env-driven and contains NO secrets,
+# so (unlike upstream ORSEE) we DO commit it. It is deliberately NOT ignored.
+
+# Runtime artifacts written by the webalizer / usage stats stay out of git.
+usage/*
+!usage/webalizer.template

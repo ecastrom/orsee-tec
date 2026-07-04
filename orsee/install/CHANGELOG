@@ -1,0 +1,122 @@
+ORSEE 3.4.0
+
+New feature:    UI migration from legacy table-based layout to responsive
+                CSS/div component styling. New unified ORSEE shell and CSS
+                styling system for admin and public areas. Also has dark mode.
+                Public area designed mobile-first, with responsive tablet/
+                desktop adaptations.
+New feature:    Public content rendered via wiki-like richtext syntax
+New feature:    Configurable menu editor introduced (public + admin) with
+                ordering, item types, visibility rules, and custom pages.
+                Menu modes: vertical, horizontal dynamic submenu,
+                horizontal static submenu.
+New feature:    Comprehensive participant profile layout builder,
+                allowing variants based on form location and subpools,
+                draft and activation. New participant profile field
+                types (yes/no, date variants, phone, checkboxlist_lang).
+New feature:    Full right-to-left (RTL) language support
+New feature:    Support for secondary participant email.
+New feature:    Query module for subscriptions in participant search.
+New feature:    Selected participant fields editable in session
+                participant list.
+New feature:    Configurable session timeout for http sessions
+New feature:    Adding auth migration status to query tool
+New feature:    Convert ORSEE database tables from MyISAM to InnoDB
+Bugfix:         Login js autosubmit removed (interferes with CSRF).
+Bugfix:         Missing viewport meta tag.
+Security:       Whitelisting $_REQUEST data 
+Housekeeping:   jQuery removed. 
+Housekeeping:   Onset UI assets removed. 
+Housekeeping:   Font Awesome upgraded.
+Housekeeping:   Running all files through php-cs-fixer (php)
+                and prettier (js and css)
+Housekeeping:   Update data import functions from v2 and v3.0-3.3
+
+ORSEE 3.3.0
+        Many minor and major bugfixes
+        Security: Added CSRF tokens to all ORSEE forms
+        Security: Session regeneration, redirect hardening,
+                  cookie and email sanitization
+        New feature: Integration of PHPMailer as mail backend
+        New feature: OAuth2 capability for PHPMailer integration
+        Updated PHPlot from version 6.2.1 to version 8.0.0.3
+        Updated jQuery to version 3.7.1 and improved mobile pages
+        Bugfix: Bulk mailing no longer stops when participant uses
+                previously deleted language
+        Bugfix: Permanent query handling fixed
+        Bugfix: Language deletion fixed
+        Bugfix: PHP8 compatibility fixes
+        Bugfix: Replace deprecated jQuery size() with length in textext plugin
+        Bugfix: Truncate cron log target to column size
+        Bugfix: Avoid warnings in multi_array_sort() and uasort()
+                return handling
+        Misc: Fix link to documentation
+
+ORSEE 3.2.0
+        Minor and major bugfixes
+        Upgrade to PHP8
+	New feature: Allows different invitation email templates for 
+                     different external experiment types
+
+ORSEE 3.1.0
+        Many minor and major bugfixes -> compatible with PHP7
+        New feature: Bulk-anonymize participant profiles with default values
+        New feature: Hide column values for some admin types
+        New feature: Search for interface language in search tool
+        New feature: Use internal fields in freetext search in search tool
+        New feature: Use more experiment details in email texts
+        New feature: Edit participant profiles from mail queue
+        New feature: Download session participant list as CSV
+        New feature: Change session status of multiple sessions at once
+        New feature: Set experiment access restriction as default
+        New feature: Restrict no-show count to sessions after specific date
+        New feature: Automatically updates database when new features require
+                     new language terms or new user rights
+        New feature: Import participant data from csv/txt file
+        New feature: Use SSL connection with external MySQL databases
+
+ORSEE 3.0.5
+    Many minor and major bugfixes
+    New feature: Display ORSEE version in General Settings
+    New feature: Disable js auto-submit on admin login form
+    New feature: Edit faq count
+    New feature: Allow "none"-option for select_numbers field
+    New feature: Hide planned sessions in public calendar
+    
+ORSEE 3.0.4
+    Many minor and major bugfixes
+    New feature: Email module allows SSL connections
+    New feature: weekdays can be displayed in session lists
+    New feature: import participant data from txt file
+    New feature: calendar can be displayed by laboratory
+    New feature: Edit links can be displayed in session & assign lists
+
+ORSEE 3.0.3
+    Larger bugfix for wrongly encoded special characters (UTF8)
+    Bugfix for javascript in bulk actions/faqs
+    Database version now stored in or_options
+
+ORSEE 3.0.2:
+    Some critical bugfixes.
+    Updated install/UPGRADE.howto.
+
+ORSEE 3.0.1:
+    Many minor bugfixes.
+    config/settings.php is now in install/settings-dist.php
+    and needs to be copied over
+
+ORSEE 3.0.0:
+    Too numerous to list.
+
+ORSEE 2.2.1:
+    Fixed bug which had PDF session participant list ordered randomnly.
+
+ORSEE 2.2.0:
+    Updated ORSEE to PHP5/MySQL5
+    Fixed all bugs reported on sourceforge bug tracker and elsewhere.
+    Updated all mysql function to mysqli.
+    Fixed all implicit variable definitions (undefined index / undefined variable notices).
+    Security: Real-escaped all posted vars in publicly accessible section.
+    Updated to newest version of PHPlot and ezPDF.
+    Updated ORSEE and MySQL database to full unicode/UTF-8 support.
+    Added participant form customization support.

@@ -1,0 +1,89 @@
+# BEER Lab / ORSEE local & VPS stack.
+#
+#   Quick start:
+#     cp .env.example .env      # then edit passwords
+#     docker compose up --build
+#     open http://localhost:8080/admin   (login: orsee_install / install)
+#
+# Services:
+#   db   - MySQL 8, data persisted in a named volume (survives restarts).
+#   web  - PHP 8.2 + Apache serving ORSEE; imports the schema on first boot.
+#   cron - runs ORSEE's cron task every 5 minutes (mail queue, reminders).
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-orsee}"
+      MYSQL_USER: "${MYSQL_USER:-orsee}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-orsee_pw}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root_pw}"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - orsee_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-root_pw}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Discrete DB vars (settings.php reads these when no *_URL is set).
+      ORSEE_DB_HOST: db
+      ORSEE_DB_PORT: "3306"
+      ORSEE_DB_NAME: "${MYSQL_DATABASE:-orsee}"
+      ORSEE_DB_USER: "${MYSQL_USER:-orsee}"
+      ORSEE_DB_PASS: "${MYSQL_PASSWORD:-orsee_pw}"
+      ORSEE_SERVER_URL: "${ORSEE_SERVER_URL:-localhost:8080}"
+      ORSEE_SERVER_PROTOCOL: "${ORSEE_SERVER_PROTOCOL:-http://}"
+      ORSEE_ROOT_DIRECTORY: ""
+      ORSEE_TIMEZONE: "${ORSEE_TIMEZONE:-America/Monterrey}"
+      # Mail: default to PHP mail() off-box won't deliver; set SMTP to send.
+      ORSEE_MAIL_TRANSPORT: "${ORSEE_MAIL_TRANSPORT:-mail}"
+      ORSEE_SMTP_HOST: "${ORSEE_SMTP_HOST:-}"
+      ORSEE_SMTP_PORT: "${ORSEE_SMTP_PORT:-587}"
+      ORSEE_SMTP_SECURE: "${ORSEE_SMTP_SECURE:-tls}"
+      ORSEE_SMTP_USER: "${ORSEE_SMTP_USER:-}"
+      ORSEE_SMTP_PASS: "${ORSEE_SMTP_PASS:-}"
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    # Import schema on first boot (idempotent), then start Apache.
+    command: >
+      bash -c "php /var/www/html/bin/import-db.php || true;
+               exec apache2-foreground"
+
+  cron:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ORSEE_DB_HOST: db
+      ORSEE_DB_PORT: "3306"
+      ORSEE_DB_NAME: "${MYSQL_DATABASE:-orsee}"
+      ORSEE_DB_USER: "${MYSQL_USER:-orsee}"
+      ORSEE_DB_PASS: "${MYSQL_PASSWORD:-orsee_pw}"
+      ORSEE_SERVER_URL: "${ORSEE_SERVER_URL:-localhost:8080}"
+      ORSEE_SERVER_PROTOCOL: "${ORSEE_SERVER_PROTOCOL:-http://}"
+      ORSEE_TIMEZONE: "${ORSEE_TIMEZONE:-America/Monterrey}"
+    # Run ORSEE's cron every 5 minutes.
+    command: >
+      bash -c "while true; do
+                 bash /var/www/html/bin/cron.sh || true;
+                 sleep 300;
+               done"
+
+volumes:
+  orsee_db:
