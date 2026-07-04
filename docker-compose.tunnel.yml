@@ -1,0 +1,22 @@
+# Optional overlay: expose the self-hosted ORSEE box to the internet over HTTPS
+# via a Cloudflare Tunnel — no port forwarding, no static IP, no public inbound
+# ports. Runs alongside the main stack.
+#
+# Prereq: create a tunnel in the Cloudflare Zero Trust dashboard, route your
+# hostname (e.g. beerlab.example.org) to http://web:80, and copy the tunnel
+# token into CLOUDFLARE_TUNNEL_TOKEN in your .env.
+#
+# Start everything (main stack + tunnel):
+#   docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build
+#
+# See bin/self-host.md for the full walkthrough.
+
+services:
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: "${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}"
+    depends_on:
+      - web
