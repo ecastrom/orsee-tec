@@ -62,7 +62,7 @@ orsee-tec/
 ```bash
 # desde la raíz del repo
 heroku create orsee-beerlab            # elige el nombre que quieras
-heroku stack:set heroku-22 -a orsee-beerlab
+heroku stack:set heroku-24 -a orsee-beerlab
 heroku buildpacks:set heroku/php -a orsee-beerlab
 
 # Base de datos MySQL (add-on JawsDB). Provee la variable JAWSDB_URL automáticamente.

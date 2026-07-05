@@ -4,7 +4,7 @@
     "repository": "https://github.com/ecastrom/orsee-tec",
     "keywords": ["php", "orsee", "experimental-economics", "recruitment", "tec-de-monterrey"],
     "website": "https://www.orsee.org",
-    "stack": "heroku-22",
+    "stack": "heroku-24",
     "buildpacks": [
         { "url": "heroku/php" }
     ],
