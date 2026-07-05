@@ -1,0 +1,295 @@
+% !TEX program = pdflatex
+% Propuesta institucional: ORSEE para el BEER Lab — dirigida a la DTI, Tec de Monterrey.
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+\usepackage{parskip}
+
+\definecolor{tecblue}{HTML}{0039A6}
+
+\newcommand{\seccion}[1]{\section*{\color{tecblue}#1}}
+\newcommand{\subseccion}[1]{\subsection*{#1}}
+
+\title{}
+\date{}
+
+\begin{document}
+
+% ---------- Portada ----------
+\begin{center}
+    \includegraphics[width=0.45\textwidth]{../resources/logo_tec.png}\\[2.2em]
+    {\LARGE\bfseries\color{tecblue} Propuesta de adopción institucional}\\[0.6em]
+    {\Large ORSEE: plataforma de reclutamiento y gestión del banco de\\ participantes para experimentos económicos}\\[1.4em]
+    {\large BEER Lab --- \emph{Behavioral \& Experimental Economics Research Lab}\\
+    Departamento de Economía, Escuela de Ciencias Sociales y Gobierno\\
+    Tecnológico de Monterrey, Campus Monterrey}\\[1.8em]
+    \begin{tabular}{c@{\hspace{3em}}c}
+        \textbf{Stanislao Maldonado, Ph.D.} & \textbf{Edgar Castro, Ph.D.}\\
+        Profesor Investigador & Profesor\\
+        Departamento de Economía & Departamento de Economía\\
+        \href{mailto:stanislao.maldonado@tec.mx}{stanislao.maldonado@tec.mx} & \href{mailto:ecastrom@tec.mx}{ecastrom@tec.mx}\\
+        \href{https://www.stanislaomaldonado.org/}{stanislaomaldonado.org} & \href{https://ecastrom.github.io/cv/main.html}{ecastrom.github.io}
+    \end{tabular}\\[1.8em]
+    {\normalsize Dirigido a: Dirección de Tecnologías de Información (DTI)\\ Julio de 2026}
+\end{center}
+
+\vspace{1em}
+\hrule
+\vspace{1.5em}
+
+% ---------- Resumen ejecutivo ----------
+\seccion{1. Resumen ejecutivo}
+
+El BEER Lab solicita el apoyo de la DTI para convertir en \textbf{servicio institucional} una
+plataforma web de reclutamiento y gestión de participantes para experimentos económicos,
+basada en \textbf{ORSEE}, el software estándar de los laboratorios de economía experimental a
+nivel mundial. La plataforma ya está \textbf{adaptada, funcionando y probada} en una instancia
+de desarrollo; lo que necesitamos de la DTI son tres cosas concretas:
+
+\begin{enumerate}[leftmargin=2em]
+    \item Una \textbf{cuenta institucional de correo} para el laboratorio (propuesta:
+    \texttt{econ-lab@tec.mx}), con autorización para envío automatizado de invitaciones
+    a través del relay institucional.
+    \item La \textbf{revisión y aprobación} de la herramienta bajo los lineamientos
+    institucionales de seguridad y tratamiento de datos (el código es abierto y el
+    repositorio está disponible para auditoría).
+    \item El \textbf{despliegue en infraestructura de la DTI}, para que los datos personales
+    de la comunidad Tec residan en servidores institucionales y no en una nube comercial
+    externa.
+\end{enumerate}
+
+Las razones de fondo son dos: \textbf{(i)} proteger la \textbf{identidad y el anonimato} de los
+participantes en investigación con seres humanos --- una capacidad que hoy ninguna
+plataforma institucional ofrece --- y \textbf{(ii)} profesionalizar la \textbf{gestión del banco
+de participantes} (convocatorias, citas, recordatorios, asistencia y pagos), que hoy solo
+puede hacerse de forma manual y dispersa. El resto del documento explica la herramienta,
+lo que ya construimos, su arquitectura, y por qué la instancia actual de pruebas no puede
+ser la versión definitiva.
+
+% ---------- Qué es ORSEE ----------
+\seccion{2. ¿Qué es ORSEE?}
+
+ORSEE (\emph{Online Recruitment System for Economic Experiments}) es una aplicación web de
+código abierto creada por el profesor Ben Greiner y publicada en el \emph{Journal of the
+Economic Science Association} \cite{greiner2015}. Es el \textbf{estándar de facto} para la
+gestión de bancos de participantes en laboratorios de economía experimental: lo utilizan
+cientos de laboratorios universitarios en el mundo, y citarlo es práctica obligada en las
+publicaciones del área. Sus funciones principales:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Registro voluntario} de participantes en un banco de sujetos, con perfil
+    demográfico mínimo definido por el laboratorio.
+    \item \textbf{Convocatorias dirigidas}: para cada estudio se invita por correo a una
+    muestra aleatoria de participantes elegibles (evita sesgos de autoselección).
+    \item \textbf{Calendario de sesiones} con inscripción en línea, cupos por sala,
+    confirmaciones y recordatorios automáticos.
+    \item \textbf{Control de asistencia y reputación} (inasistencias/\emph{no-shows}),
+    esencial para la validez de los experimentos.
+    \item \textbf{Registro de pagos} a participantes (en nuestro caso, principalmente
+    créditos de Amazon o equivalentes).
+    \item \textbf{Multilenguaje} (nuestra instalación: español por defecto, inglés disponible).
+\end{itemize}
+
+Técnicamente es una aplicación PHP + MySQL convencional, ligera y auditable
+($\sim$30~MB de código, sin dependencias exóticas). Los experimentos en sí \emph{no} corren
+en ORSEE (corren en oTree, en despliegues separados); ORSEE solo recluta, agenda y
+comunica.
+
+% ---------- Por qué la necesitamos ----------
+\seccion{3. ¿Por qué el Tec necesita esta plataforma? (las razones de fondo)}
+
+\subseccion{3.1 Protección de la identidad de los participantes (anonimato)}
+
+La investigación experimental con seres humanos exige que la \textbf{identidad} del
+participante quede separada de sus \textbf{decisiones} en el experimento. Hoy el Tec
+\textbf{no cuenta con ninguna plataforma institucional} que implemente esa separación: si un
+laboratorio recluta por listas de correo, formularios genéricos u hojas de cálculo, los
+datos personales y los datos de investigación terminan mezclados, con riesgo real para la
+privacidad de los alumnos y para el cumplimiento de los protocolos aprobados por el
+Comité de Ética en Investigación.
+
+ORSEE resuelve esto por diseño:
+
+\begin{itemize}[leftmargin=2em]
+    \item La base de reclutamiento (identidad y contacto) vive en un sistema aparte,
+    accesible solo al personal autorizado del laboratorio, y se usa \emph{únicamente} para
+    invitar y agendar.
+    \item En el experimento, cada persona participa bajo un \textbf{identificador anónimo};
+    los datos de decisiones nunca se almacenan junto a la identidad.
+    \item El flujo es compatible con la \emph{Ley Federal de Protección de Datos Personales en
+    Posesión de los Particulares} (LFPDPPP) y con el Aviso de Privacidad del Tecnológico
+    de Monterrey: consentimiento informado previo, finalidad limitada, derechos ARCO
+    (acceso, rectificación, cancelación y oposición) atendibles desde el panel de
+    administración.
+\end{itemize}
+
+\subseccion{3.2 Gestión profesional del banco de participantes}
+
+El ciclo completo de un experimento --- convocar, invitar aleatoriamente, inscribir,
+confirmar, recordar, tomar asistencia, registrar pagos y administrar la reputación de
+asistencia --- es operativamente intensivo. Hacerlo a mano (correo + hojas de cálculo) no
+escala, produce errores, y expone datos personales. Con ORSEE ese ciclo queda
+automatizado, trazable y auditable, lo que además reduce las cargas operativas del
+personal del laboratorio y mejora la experiencia de los alumnos participantes.
+
+% ---------- Lo que ya hicimos ----------
+\seccion{4. Estado actual: lo que ya está construido y funcionando}
+
+Todo el trabajo está versionado en un repositorio Git
+(\url{https://github.com/ecastrom/orsee-tec}) listo para auditoría. Resumen de lo realizado:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Base}: ORSEE 3.4.0 (última versión estable) incorporado al repositorio con
+    marcador de versión, para actualizaciones controladas.
+    \item \textbf{Localización completa}: español (variante mexicana) como idioma público por
+    defecto e inglés como segunda lengua; $\sim$220 cadenas traducidas (interfaz, formularios,
+    preguntas frecuentes, plantillas de correo, estados); bandera de México en el selector;
+    teléfono con México como país por defecto.
+    \item \textbf{Contenido del laboratorio}: página de bienvenida, \textbf{reglas de
+    participación} (derivadas del manual operativo del laboratorio), aviso de privacidad
+    alineado a la LFPDPPP, aviso legal y datos de contacto de los responsables.
+    \item \textbf{Identidad institucional}: encabezado con el logotipo del Tecnológico de
+    Monterrey y paleta de color institucional.
+    \item \textbf{Configuración 12-factor}: el código no contiene secretos ni contraseñas;
+    toda la configuración (base de datos, URL pública, zona horaria, SMTP) se inyecta por
+    \textbf{variables de entorno}, por lo que la misma base corre igual en Heroku, en Docker
+    o en un servidor de la DTI.
+    \item \textbf{Endurecimiento web}: rutas sensibles bloqueadas a nivel de servidor
+    (\texttt{install/}, \texttt{config/}, librerías PHP internas), sin listados de
+    directorios, contraseñas de administradores con \emph{bcrypt}, CAPTCHA en el registro
+    (corregido por nosotros), cambio de contraseña forzado en el primer acceso.
+    \item \textbf{Operación}: importación de esquema idempotente en el primer despliegue
+    (los redespliegues nunca tocan datos), tarea programada cada 10 minutos para la cola
+    de correo y recordatorios, script de diagnóstico SMTP, script de respaldo
+    (\texttt{mysqldump}) para el camino autoalojado.
+    \item \textbf{Instancia de desarrollo en vivo} (Heroku):
+    \url{https://orsee-beerlab-d86d8a0b91dc.herokuapp.com} --- usada exclusivamente para
+    desarrollo, pruebas y demostración. \textbf{No contiene aún datos reales de alumnos.}
+\end{itemize}
+
+% ---------- Arquitectura ----------
+\seccion{5. Arquitectura técnica}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Componente} & \textbf{Detalle} \\
+\midrule
+Aplicación & PHP $\geq$ 8.1 (probada en 8.5), Apache 2.4; sin frameworks externos, $\sim$30 MB \\
+Base de datos & MySQL 8.0 (también compatible con MariaDB); tamaño esperado $<$ 5 GB \\
+Extensiones PHP & \texttt{pdo\_mysql}, \texttt{mbstring}, \texttt{gd} (con FreeType), \texttt{openssl}, \texttt{curl}, \texttt{json}, \texttt{session}, \texttt{filter} \\
+Correo saliente & SMTP autenticado vía PHPMailer (configurable por variables de entorno) \\
+Tareas programadas & \texttt{cron} cada 5--10 min (cola de correo, recordatorios) \\
+Configuración & 100\% variables de entorno; catálogo documentado en \texttt{.env.example} \\
+Despliegue & \textbf{Docker Compose incluido en el repositorio} (web + MySQL + cron), listo para el servidor de la DTI; alternativamente Apache/PHP nativos \\
+Seguridad & HTTPS obligatorio, bcrypt, rutas sensibles denegadas, sin secretos en el código \\
+Respaldos & Script \texttt{mysqldump} incluido; todos los datos viven en MySQL \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Datos personales que almacena}: nombre, correo, teléfono (opcional) y perfil
+demográfico básico definido por el laboratorio (p.~ej.\ género, edad, si estudia o trabaja,
+carrera). \textbf{No almacena}: datos bancarios, calificaciones, expedientes académicos ni
+datos sensibles. Los datos de decisiones experimentales viven en sistemas aparte (oTree)
+bajo identificadores anónimos.
+
+% ---------- Por qué Heroku no es la versión final ----------
+\seccion{6. Por qué la instancia actual (Heroku) no puede ser la definitiva}
+
+La instancia en Heroku ha sido la manera más rápida de desarrollar y demostrar la
+plataforma, pero es inadecuada como servicio de producción por dos razones de peso:
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Datos personales fuera del perímetro institucional.} Heroku es una nube
+    comercial (infraestructura en EE.UU.) sin convenio con el Tec: los datos de contacto de
+    alumnos quedarían fuera de las políticas institucionales de tratamiento y resguardo, y
+    su sistema de archivos es \emph{efímero} (se borra en cada reinicio), lo que impide
+    garantías institucionales de respaldo y continuidad.
+    \item \textbf{Entregabilidad del correo.} Las invitaciones y recordatorios son el corazón
+    del sistema. Hoy salen desde una cuenta de Gmail del laboratorio, lo cual:
+    (a) tiene límites de envío bajos ($\sim$500 destinatarios/día);
+    (b) tiene alta probabilidad de terminar en \emph{spam} para los alumnos; y
+    (c) \textbf{no puede} enviarse como \texttt{@tec.mx} desde fuera del tenant institucional,
+    porque las políticas SPF/DKIM/DMARC del dominio (correctamente estrictas) lo bloquean.
+    Solo la DTI puede autorizar un remitente institucional, y un remitente institucional es
+    lo que hace que los alumnos confíen en el mensaje y las invitaciones lleguen a la
+    bandeja de entrada.
+\end{enumerate}
+
+A esto se suma que un dominio \texttt{herokuapp.com} transmite poca legitimidad a los
+alumnos (parece \emph{phishing}), mientras que un subdominio institucional aumenta el
+registro y la confianza.
+
+% ---------- Solicitudes ----------
+\seccion{7. Solicitudes concretas a la DTI}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Cuenta institucional de correo para el laboratorio} --- propuesta:
+    \texttt{econ-lab@tec.mx} --- con autorización para envío automatizado \emph{moderado}
+    (invitaciones, confirmaciones y recordatorios a participantes registrados que dieron su
+    consentimiento; volumen estimado: decenas a pocos cientos de correos por semana en
+    temporada de experimentos).
+    \item \textbf{Revisión y aprobación de la herramienta} bajo los lineamientos
+    institucionales de seguridad de la información y protección de datos. El código es
+    abierto, el repositorio está disponible, y con gusto agendamos las sesiones técnicas
+    que se requieran.
+    \item \textbf{Despliegue en infraestructura de la DTI} (servidor institucional), usando
+    el stack Docker incluido en el repositorio o el esquema Apache/PHP nativo que la DTI
+    prefiera, con HTTPS y un subdominio institucional (p.~ej.\
+    \texttt{econlab.tec.mx} o el que la DTI determine).
+\end{enumerate}
+
+\textbf{Condiciones de colaboración que proponemos:}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Gobernanza del código}: todo ajuste que la DTI realice a la plataforma se
+    integre (\emph{commit}) al repositorio Git compartido, para mantener una sola fuente de
+    verdad auditable; idealmente, los investigadores responsables quedamos como
+    colaboradores autorizados del repositorio.
+    \item \textbf{Modelo de soporte}: proponemos un esquema de dos niveles --- el
+    \textbf{laboratorio} atiende el primer nivel (dudas de participantes e investigadores,
+    contenido, cuentas de la plataforma) y la \textbf{DTI} el soporte de infraestructura
+    (servidor, base de datos, correo, respaldos, certificados). Así el costo operativo para
+    la DTI es mínimo y acotado.
+\end{enumerate}
+
+% ---------- Cierre ----------
+\seccion{8. Cierre}
+
+Esta plataforma convierte una necesidad real y recurrente de la investigación experimental
+en el Tec --- reclutar participantes protegiendo su identidad --- en un servicio ordenado,
+auditable y alineado con la normativa de datos personales. El trabajo técnico pesado ya
+está hecho y probado; lo que falta es precisamente lo que solo la DTI puede aportar:
+residencia institucional de los datos, un remitente de correo confiable y el respaldo
+oficial de la institución. Quedamos a disposición para una demostración en vivo de la
+instancia de pruebas y para las mesas técnicas que la DTI considere necesarias.
+
+\vspace{1.5em}
+\noindent Atentamente,\\[2.2em]
+\noindent
+\begin{tabular}{@{}p{0.5\textwidth}p{0.5\textwidth}@{}}
+\textbf{Stanislao Maldonado, Ph.D.} & \textbf{Edgar Castro, Ph.D.}\\
+Profesor Investigador, Depto.\ de Economía & Profesor, Depto.\ de Economía\\
+\texttt{stanislao.maldonado@tec.mx} & \texttt{ecastrom@tec.mx}
+\end{tabular}
+
+% ---------- Referencias ----------
+\begin{thebibliography}{9}
+\bibitem{greiner2015}
+Greiner, B. (2015). Subject pool recruitment procedures: organizing experiments with ORSEE.
+\emph{Journal of the Economic Science Association}, 1(1), 114--125.
+DOI: \href{https://doi.org/10.1007/s40881-015-0004-4}{10.1007/s40881-015-0004-4}.
+\end{thebibliography}
+
+\end{document}

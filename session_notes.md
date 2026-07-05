@@ -174,3 +174,21 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
   __DIR__.'/../tagsets/fonts/Inter-Regular.ttf'. Verified letters now render. GD FreeType is OK.
 - Logo: orsee/tagsets/css/orsee_default_header.php rewritten — single Tec logo CENTERED,
   ORSEE taglines removed, torch already blank. VENDORED EDIT.
+
+## Form ES/EN + phone MX + repo cleanup + DTI doc (v26-v28)
+- or_profile_fields.properties holds per-field language maps ({de,en}); bin/fields-es.php
+  adds es (labels, help texts, validation messages) and sets phone_default_country=mx.
+  Idempotent; upgrades es values that are still English copies when a mapping exists;
+  never touches customized es. Verified: Spanish view fully Spanish, English view fully
+  English, phone widget starts on Mexico.
+- es_translations.json now 221 keys (adds experiment types, 38 majors, 12 professions).
+- Repo cleanup for IT review: hardcoded temp admin password removed from tec-setup.php
+  (now random one-time, printed to run log only); live smaldonado password reset via new
+  bin/reset-admin-pw.php (old exposed password invalidated); bin/README.md script
+  inventory added; stale branch ref fixed in DEPLOYMENT.md; README structure table updated.
+- docs/Propuesta_DTI_ORSEE.tex + .pdf: formal proposal to Tec DTI (Spanish, 5 pp):
+  what ORSEE is (Greiner 2015, DOI 10.1007/s40881-015-0004-4), why (anonymity/LFPDPPP +
+  subject-pool management), current state, architecture, why Heroku can't be final
+  (data residency/ephemeral FS + email deliverability/SPF-DMARC), explicit requests
+  (econ-lab@tec.mx, review/approval, DTI deployment, commits to shared repo, two-tier
+  support model: lab=first line, DTI=infrastructure).

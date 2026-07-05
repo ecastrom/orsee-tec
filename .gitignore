@@ -11,3 +11,9 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# LaTeX build artifacts (docs/)
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
