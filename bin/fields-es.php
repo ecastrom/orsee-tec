@@ -40,8 +40,17 @@ $MAP = [
     'interface language'                      => 'Idioma de la interfaz',
     'language'                                => 'Idioma de la interfaz',
     'i would like to receive invitations for' => 'Quiero recibir invitaciones para',
+    'invitations'                             => 'Invitaciones',
     'providing this allows us to reach you quickly, e.g. when an experiment gets canceled or similar.'
         => 'Proporcionarlo nos permite contactarte rápidamente, por ejemplo, si un experimento debe cancelarse.',
+    'this allows us to contact you in urgent cases, e.g. when a session needs to be cancelled.'
+        => 'Esto nos permite contactarte en casos urgentes, por ejemplo, si una sesión debe cancelarse.',
+    'please enter your e-mail-address!'       => '¡Por favor, ingresa tu correo electrónico!',
+    'the e-mail-address seems not to be valid!' => '¡El correo electrónico no parece ser válido!',
+    'your email-address is already registered in our system! you should be receiving invitations from us!'
+        => '¡Tu correo electrónico ya está registrado en nuestro sistema! ¡Deberías estar recibiendo nuestras invitaciones!',
+    'please enter your first name.'           => 'Por favor, ingresa tu nombre.',
+    'please enter your last name.'            => 'Por favor, ingresa tus apellidos.',
 ];
 
 $unmapped = [];
@@ -51,8 +60,15 @@ function fields_add_es(&$node, $MAP, &$unmapped, &$changed) {
     if (!is_array($node)) {
         return;
     }
+    // Fill a missing/empty es — or upgrade an es that is still just a copy of the
+    // English value and for which we now have a real Spanish mapping. Genuine
+    // customizations (es differing from en) are never touched.
+    $es_now = isset($node['es']) ? trim((string) $node['es']) : '';
+    $en_now = isset($node['en']) ? trim((string) $node['en']) : '';
+    $upgradable = ($es_now !== '' && $es_now === $en_now
+        && isset($MAP[mb_strtolower($en_now, 'UTF-8')]));
     if ((isset($node['en']) || isset($node['de']))
-        && (!isset($node['es']) || trim((string) $node['es']) === '')) {
+        && ($es_now === '' || $upgradable)) {
         $en = isset($node['en']) ? trim((string) $node['en']) : '';
         if ($en !== '') {
             $key = mb_strtolower($en, 'UTF-8');
