@@ -154,3 +154,21 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
   running lang-es.php after tec-setup.php reverted lab content to generic. Fix:
   lang-es.php now skips ids 200001/200003/200004/200005/200006 (owned by tec-setup.php).
   Run order no longer matters. Both idempotent.
+
+## Form cleanup + captcha + logo (v22-v23)
+- German everywhere: root cause was language-map fallback picking first value (de) when
+  es missing. Fixed in orsee/tagsets/participant.php (2 resolvers) + html_stuff.php
+  (menu_text_from_lang_map) to prefer 'en' before first-value. Now untranslated labels
+  show English (never German) in both es and en views. VENDORED EDITS — re-apply on upgrade.
+- Registration-form field labels (Vorname/Geschlecht/Studienfach) come from or_profile_fields
+  properties (de/en maps); now show English via the fallback. They become Spanish when the
+  lab's real demographic fields are configured (still pending).
+- Translated (es_translations.json, applied by lang-es.php): page titles (registration_form,
+  experiment_calendar, experiments, faq_long, my_registrations, invitations, confirm_registration,
+  edit_participant_data, finished_experiments, edit_participant), gender (Hombre/Mujer/No binario),
+  subjectpool options. Form instruction blocks via bin/profile-es.php (profile_form_layout).
+- Captcha FIX: orsee/public/captcha.php used a relative font path ('../tagsets/fonts/..')
+  that broke under Heroku php-fpm CWD, so imagefttext drew no letters (unreadable). Changed to
+  __DIR__.'/../tagsets/fonts/Inter-Regular.ttf'. Verified letters now render. GD FreeType is OK.
+- Logo: orsee/tagsets/css/orsee_default_header.php rewritten — single Tec logo CENTERED,
+  ORSEE taglines removed, torch already blank. VENDORED EDIT.
