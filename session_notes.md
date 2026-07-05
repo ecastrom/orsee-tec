@@ -23,7 +23,15 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 - **Config vars set:** ORSEE_SERVER_PROTOCOL=https://, ORSEE_SERVER_URL=<host above>,
   ORSEE_ROOT_DIRECTORY="", ORSEE_TIMEZONE=America/Monterrey, ORSEE_MAIL_TRANSPORT=phpmailer.
 
-## Fix made this session
+## Fixes made this session
+- **Unstyled UI / stray modal fragments + broken logos** (v12, commit `d22e869`):
+  the `/tagsets/` deny rule blocked the whole dir, but ORSEE serves framework CSS,
+  fonts, logos and JS from `tagsets/css|fonts|js`. With bulma.min.css 403ing, the
+  `.modal`/`.is-hidden` classes never loaded → popup templates showed at page top and
+  logos broke. Changed rule to deny only `tagsets/*.php`; static assets now 200, PHP
+  libraries + config/settings.php + install.sql still 403. (Browser hard-refresh needed
+  once, since the 403'd CSS was cached.)
+
 - **403 on all pages** → root cause: Heroku PHP buildpack's `DirectoryIndex` is
   `index.html` only; ORSEE entry points are `index.php`. Added
   `DirectoryIndex index.php index.html` to `heroku/apache2.conf` (commit `2cfe9cf`).
@@ -43,17 +51,14 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 - tec.mx was ruled out for SMTP: it's Microsoft 365 (MX tec-mx.mail.protection.outlook.com),
   basic-auth SMTP is disabled + strict DMARC, so can't send as @tec.mx without Tec IT.
 
-## Cron (mail queue flush) — add-on created, JOB NOT YET SCHEDULED
+## Cron (mail queue flush) — DONE 2026-07-04, scheduled
 - `scheduler:standard` add-on installed (scheduler-polished-94615).
 - `bin/cron.sh` verified to run cleanly on a one-off dyno (empty queue, exits 0; only a
   cosmetic `Undefined array key "count"` PHP 8.5 warning from orsee/tagsets/cronjobs.php:251).
-- ⚠️ REMAINING MANUAL STEP: Heroku Scheduler jobs are dashboard-only (no CLI). Run
-  `heroku addons:open scheduler -a orsee-beerlab`, add job Command `bash bin/cron.sh`,
-  frequency **Every 10 minutes**. Until this is done, queued ORSEE emails won't send.
+- Scheduler job created in dashboard: Command `bash bin/cron.sh`, **Every 10 minutes**,
+  Basic dyno. Confirmed via screenshot (first run pending next 10-min tick).
 
 ## Pending / next steps
-- [ ] **Schedule the cron job in the Scheduler dashboard** (see above) — required for
-      automatic invitations/reminders.
 - [ ] First-login hardening: change `orsee_install` password + email (DEPLOYMENT.md §5).
 - [ ] In admin UI set Options → General Settings → System support email address to
       beer.tec.mx@gmail.com (matches the Gmail sending account).
