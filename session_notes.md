@@ -23,6 +23,34 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 - **Config vars set:** ORSEE_SERVER_PROTOCOL=https://, ORSEE_SERVER_URL=<host above>,
   ORSEE_ROOT_DIRECTORY="", ORSEE_TIMEZONE=America/Monterrey, ORSEE_MAIL_TRANSPORT=phpmailer.
 
+## Lab customization batch (v18, commit e13d2ab)
+- Header: removed navy. Colors (or_options, option_type='color', style 'orsee'):
+  html_header_top_bar_background & logo_bar_background -> #ffffff (white),
+  logo_bar_text -> #0039a6, menu_background -> #0039a6 (Tec blue). Tweak via
+  Options -> Colors or re-run bin/tec-setup.php.
+- Logo shown once: orsee3_sign.png (the standalone torch) replaced with a 1x1
+  transparent PNG; full wordmark orsee3_logo.png remains in the right slot.
+- Public content adapted to the lab (bin/tec_content.json + bin/tec-setup.php),
+  es+en, in or_lang public_content: mainpage_welcome, rules (participant rules from
+  the lab manual: registro único, consentimiento, asistencia/no-show, pagos efectivo
+  o transferencia <=3 días, credencial Tec, LFPDPPP), contact (both PIs + address +
+  phone), impressum (address/phone/PIs/LFPDPPP), privacy_policy (LFPDPPP + Tec notice).
+  Lab address: Av. Eugenio Garza Sada Sur 2501, Col. Tecnológico, C.P. 64700, Monterrey
+  NL, Salón A6-101. Tel +52 81 8358 2000.
+- Second admin created: adminname 'smaldonado' (Stanislao Maldonado,
+  stanislao.maldonado@tec.mx), admin_type 'installer' (full access), temp password
+  'BeerLab-Temporal-2026', pw_update_requested=1 (must change on first login).
+- The public menu was already Spanish (v17); user's "still English" was browser cache.
+
+## PENDING - sign-up demographic fields (needs admin UI, NOT scripted)
+- Requested fields on registration: sex/gender identity, age, studying-or-working,
+  studying at Tec (y/n), major/carrera.
+- ORSEE already ships fields: gender, field_of_studies (majors), profession, subjectpool.
+  Plan: enable/relabel these for the sign-up form + add age and occupation + Tec-student.
+- ORSEE profile-field system is intricate (field specs + subpool applicability +
+  ALTER TABLE or_participants). Do via admin Options -> Participant profile fields,
+  or drive via browser automation. Scripting blind risks breaking sign-up.
+
 ## Branding — Tec logo in header (v14, commit b6f6fee)
 - Source art: resources/logo_tec.png (800x211, transparent). Generated with PIL two
   header images (overwrites ORSEE defaults in orsee/tagsets/css/ — re-apply on upgrade):
