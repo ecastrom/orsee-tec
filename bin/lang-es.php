@@ -53,9 +53,15 @@ if (!is_array($T)) {
     fwrite(STDERR, "[lang-es] could not read es_translations.json\n");
     exit(1);
 }
+// These public_content pages are owned by bin/tec-setup.php (lab-specific text);
+// skip them here so the two scripts don't clobber each other regardless of run order.
+$owned_by_tec_setup = ['200001', '200003', '200004', '200005', '200006']; // contact, impressum, mainpage_welcome, privacy_policy, rules
 $upd = $pdo->prepare("UPDATE `$lang` SET `es` = :v WHERE lang_id = :id");
 $n = 0;
 foreach ($T as $id => $es) {
+    if (in_array((string) $id, $owned_by_tec_setup, true)) {
+        continue;
+    }
     $upd->execute([':v' => $es, ':id' => (int) $id]);
     $n += $upd->rowCount();
 }
