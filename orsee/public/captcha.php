@@ -31,7 +31,9 @@ for ($i=0;$i<120;$i++) {
 }
 for ($i=0; $i < $captcha_length; $i++) {
     $text_color = imagecolorallocate($im, rand(0, 100), rand(10, 100), rand(0, 100));
-    imagefttext($im, 35, rand(-10, 10), 20 + ($i * 30) + rand(-5, +5), 35 + rand(10, 30), $text_color, '../tagsets/fonts/Inter-Regular.ttf', $captcha[$i]);
+    // Absolute font path: a relative path breaks when the runtime CWD is not orsee/public/
+    // (e.g. under Heroku's php-fpm), so imagefttext silently drew no letters.
+    imagefttext($im, 35, rand(-10, 10), 20 + ($i * 30) + rand(-5, +5), 35 + rand(10, 30), $text_color, __DIR__ . '/../tagsets/fonts/Inter-Regular.ttf', $captcha[$i]);
 }
 header('Content-type: image/png');
 header('Pragma: no-cache');
