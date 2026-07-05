@@ -143,3 +143,14 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 - Run heroku **git push / logs from PowerShell** (host network), not the Bash tool
   (Bash runs in a sandbox that can't resolve those hosts at all). `heroku` API commands
   (create/config/addons) work from either.
+
+## Payments (Amazon) + Mexican flag (v19-v20)
+- Payments: rules + FAQ 60007 now state payment as Amazon gift credits (or equivalent
+  electronic voucher). Added payments_type '2' = "Amazon credit"/"Crédito Amazon";
+  payments_type '1' es set to 'Efectivo'. Source: bin/tec_content.json (rules),
+  bin/es_translations.json (60007), bin/tec-setup.php (payments_type + flag).
+- Spanish flag -> Mexico: or_lang lang_flag_iso2 es='mx' (offset -2448px). Set by tec-setup.php.
+- BUGFIX: es_translations.json and tec_content.json both wrote public_content pages;
+  running lang-es.php after tec-setup.php reverted lab content to generic. Fix:
+  lang-es.php now skips ids 200001/200003/200004/200005/200006 (owned by tec-setup.php).
+  Run order no longer matters. Both idempotent.
