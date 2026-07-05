@@ -70,4 +70,27 @@ if ((int) $exists->fetch()['c'] > 0) {
     fwrite(STDOUT, "[admin] temp password: $tempPassword  -> change required on first login\n");
 }
 
+/* 4. Spanish language flag -> Mexico (not Spain) --------------------------- */
+$flag = $pdo->prepare("UPDATE `$lang` SET `es` = 'mx'
+                        WHERE content_type = 'lang' AND content_name = 'lang_flag_iso2'");
+$flag->execute();
+fwrite(STDOUT, "[flag] es lang_flag_iso2 = mx (" . $flag->rowCount() . " row)\n");
+
+/* 5. payments: Spanish label for cash + add "Amazon credit" type ----------- */
+$pdo->prepare("UPDATE `$lang` SET `es` = 'Efectivo'
+               WHERE content_type = 'payments_type' AND content_name = '1'")->execute();
+$hasAmazon = $pdo->prepare("SELECT COUNT(*) c FROM `$lang`
+                             WHERE content_type = 'payments_type' AND content_name = '2'");
+$hasAmazon->execute();
+if ((int) $hasAmazon->fetch()['c'] === 0) {
+    $nid = (int) $pdo->query("SELECT COALESCE(MAX(lang_id),0)+1 AS n FROM `$lang`")->fetch()['n'];
+    $pdo->prepare(
+        "INSERT INTO `$lang` (lang_id, enabled, order_number, content_type, content_name, en, de, es)
+         VALUES (:id,'y',1,'payments_type','2','Amazon credit','Amazon-Guthaben','Crédito Amazon')"
+    )->execute([':id' => $nid]);
+    fwrite(STDOUT, "[payments] added payments_type 'Amazon credit' / 'Crédito Amazon'\n");
+} else {
+    fwrite(STDOUT, "[payments] Amazon payment type already present\n");
+}
+
 fwrite(STDOUT, "[tec-setup] DONE\n");
