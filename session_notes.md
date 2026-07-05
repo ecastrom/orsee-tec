@@ -23,6 +23,43 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 - **Config vars set:** ORSEE_SERVER_PROTOCOL=https://, ORSEE_SERVER_URL=<host above>,
   ORSEE_ROOT_DIRECTORY="", ORSEE_TIMEZONE=America/Monterrey, ORSEE_MAIL_TRANSPORT=phpmailer.
 
+## Branding — Tec logo in header (v14, commit b6f6fee)
+- Source art: resources/logo_tec.png (800x211, transparent). Generated with PIL two
+  header images (overwrites ORSEE defaults in orsee/tagsets/css/ — re-apply on upgrade):
+  - orsee3_logo.png = full "Tecnologico de Monterrey" wordmark (right slot; shown on
+    public header at 36px height, and admin header).
+  - orsee3_sign.png = torch emblem cropped from the logo (left square slot; admin header).
+- Active header is the default template (tagsets/css/orsee_default_header.php); ORSEE
+  only uses a style-specific header if style/<style>/orsee_header.php exists (it doesn't).
+- Open design choice: logo sits on header logo-bar background #566383 (slate). Tec blue
+  on slate is moderate contrast; consider setting the logo-bar background to white
+  (Options -> Colors, --orsee-html_header_logo_bar_background) for the standard Tec look.
+
+## Language: Spanish default + English (done, verified) — v15-v17
+- Requirement: public site in Spanish (LatAm) by default, English available, German removed,
+  admin UI in English. Support email -> ecastrom@tec.mx.
+- ORSEE stores languages as COLUMNS in or_lang (shipped en, de). Adding a language =
+  add column + translate. Menu/page labels are NOT in or_lang; they live as a JSON
+  menu_config in or_objects with per-language label maps.
+- Migration scripts (idempotent, run via `heroku run "php bin/<x>"`):
+  - `bin/lang-es.php` + `bin/es_translations.json`: adds `es` column, seeds es=en,
+    applies 153 participant-facing LatAm-Spanish strings (UI, FAQ, emails, public pages,
+    statuses), sets lang_name='Español'. Sets or_options: support_mail=ecastrom@tec.mx,
+    language_enabled_public/participants='es,en', **public_standard_language='es'**
+    (this last one is what actually makes Spanish the default; admin_standard_language
+    left 'en').
+  - `bin/menu-es.php`: adds Spanish `es` labels to the or_objects menu_config
+    (via ORSEE's own options__load/save_json_object, bootstrapped through
+    orsee/admin/cronheader.php). Without it the menu fell back to German.
+- To re-apply after data changes: run lang-es.php then menu-es.php. To extend
+  translations, edit bin/es_translations.json (keyed by or_lang.lang_id) and re-run.
+- German (de) column kept as data (not dropped); simply not offered.
+- Verified live: menu Inicio/Registrarse/Iniciar sesión/Calendario/Reglas/Aviso de
+  privacidad/Preguntas frecuentes/Aviso legal/Contacto; welcome + rules + FAQ in Spanish;
+  English still switchable; footer contact ecastrom@tec.mx.
+- Starter content flagged for the user to review (placeholders): FAQ payment amount,
+  invitation payment $???, impressum address/phone, privacy ethics wording.
+
 ## Fixes made this session
 - **Unstyled UI / stray modal fragments + broken logos** (v12, commit `d22e869`):
   the `/tagsets/` deny rule blocked the whole dir, but ORSEE serves framework CSS,
