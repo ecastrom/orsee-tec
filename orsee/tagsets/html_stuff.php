@@ -354,6 +354,9 @@ function html__menu_text_from_lang_map($text_lang,$fallback='') {
     if (isset($settings['public_standard_language']) && isset($text_lang[$settings['public_standard_language']]) && trim((string)$text_lang[$settings['public_standard_language']])!=='') {
         return (string)$text_lang[$settings['public_standard_language']];
     }
+    if (isset($text_lang['en']) && trim((string)$text_lang['en'])!=='') {
+        return (string)$text_lang['en'];   // BEER Lab: prefer English over an arbitrary first value (German)
+    }
     foreach ($text_lang as $value) {
         if (trim((string)$value)!=='') {
             return (string)$value;

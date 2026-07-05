@@ -2459,6 +2459,10 @@ function participant__field_localized_text($field,$json_property_name,$legacy_sy
         if ($fallback_lang!=='' && isset($text_lang[$fallback_lang]) && trim((string)$text_lang[$fallback_lang])!=='') {
             return trim((string)$text_lang[$fallback_lang]);
         }
+        // BEER Lab: prefer English over an arbitrary first value (which is German here)
+        if (isset($text_lang['en']) && trim((string)$text_lang['en'])!=='') {
+            return trim((string)$text_lang['en']);
+        }
         foreach ($text_lang as $txt) {
             if (trim((string)$txt)!=='') {
                 return trim((string)$txt);
@@ -2665,6 +2669,8 @@ function participant__render_profile_layout($layout,$fields,$field_policies=arra
                     $section_text=trim((string)$block['text_lang'][$ui_lang]);
                 } elseif ($fallback_lang!=='' && isset($block['text_lang'][$fallback_lang]) && trim((string)$block['text_lang'][$fallback_lang])!=='') {
                     $section_text=trim((string)$block['text_lang'][$fallback_lang]);
+                } elseif (isset($block['text_lang']['en']) && trim((string)$block['text_lang']['en'])!=='') {
+                    $section_text=trim((string)$block['text_lang']['en']);   // BEER Lab: prefer English over German
                 } else {
                     foreach ($block['text_lang'] as $lang_text) {
                         if (trim((string)$lang_text)!=='') {
