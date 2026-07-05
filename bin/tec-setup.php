@@ -55,7 +55,8 @@ if ((int) $exists->fetch()['c'] > 0) {
     fwrite(STDOUT, "[admin] smaldonado already exists - left unchanged\n");
 } else {
     $nextId = (int) $pdo->query("SELECT COALESCE(MAX(admin_id),0)+1 AS n FROM `$admin`")->fetch()['n'];
-    $tempPassword = 'BeerLab-Temporal-2026';
+    // Random one-time password, printed to the run log only (never stored in the repo).
+    $tempPassword = 'Tmp-' . bin2hex(random_bytes(6));
     $hash = password_hash($tempPassword, PASSWORD_DEFAULT);   // bcrypt; ORSEE verifies with password_verify()
     $ins = $pdo->prepare(
         "INSERT INTO `$admin`

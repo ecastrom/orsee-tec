@@ -38,8 +38,10 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
   Lab address: Av. Eugenio Garza Sada Sur 2501, Col. Tecnológico, C.P. 64700, Monterrey
   NL, Salón A6-101. Tel +52 81 8358 2000.
 - Second admin created: adminname 'smaldonado' (Stanislao Maldonado,
-  stanislao.maldonado@tec.mx), admin_type 'installer' (full access), temp password
-  'BeerLab-Temporal-2026', pw_update_requested=1 (must change on first login).
+  stanislao.maldonado@tec.mx), admin_type 'installer' (full access),
+  pw_update_requested=1 (must change on first login). The original hardcoded temp
+  password was exposed in git history → invalidated by a reset via
+  bin/reset-admin-pw.php (random one-time password, printed to run log only).
 - The public menu was already Spanish (v17); user's "still English" was browser cache.
 
 ## PENDING - sign-up demographic fields (needs admin UI, NOT scripted)

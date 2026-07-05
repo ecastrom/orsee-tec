@@ -100,7 +100,7 @@ heroku config:set -a orsee-beerlab \
 ### 3.3. Desplegar
 
 ```bash
-git push heroku claude/orsee-behavioral-econ-setup-sqmw7l:main
+git push heroku main
 ```
 
 En el primer despliegue, la **fase release** (`bin/release.php`) detecta que la base

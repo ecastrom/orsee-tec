@@ -27,11 +27,13 @@ reputación/no-shows y pagos. Los experimentos en sí corren en **oTree** (ver
 | Ruta | Qué es |
 |---|---|
 | [`orsee/`](orsee/) | Código de ORSEE 3.4.0 (raíz web). `config/settings.php` lee toda la configuración del entorno; no contiene secretos. Versión en [`orsee/.orsee-version`](orsee/.orsee-version). |
-| [`bin/`](bin/) | Scripts de arranque de base de datos (`release.php`, `import-db.php`, `db_bootstrap.php`) y de cron (`cron.sh`). |
-| [`heroku/`](heroku/), `Procfile`, `app.json`, `composer.json` | Configuración de despliegue en Heroku. |
-| [`docker/`](docker/), `docker-compose.yml`, `.env.example` | Stack Docker para local / VPS. |
+| [`bin/`](bin/) | Scripts de despliegue, cron, migraciones de datos del BEER Lab (idioma, contenido, campos) y utilidades. **Inventario completo en [`bin/README.md`](bin/README.md)**. |
+| [`heroku/`](heroku/), `Procfile`, `app.json`, `composer.json` | Configuración de despliegue en Heroku (instancia de **desarrollo/pruebas**). |
+| [`docker/`](docker/), `docker-compose.yml`, `.env.example` | Stack Docker para despliegue local o en servidor propio (camino recomendado para el servidor institucional). |
+| [`docs/`](docs/) | Documentación institucional: propuesta para la DTI (PDF + fuente LaTeX). |
 | [`DEPLOYMENT.md`](DEPLOYMENT.md) | **Guía de despliegue completa** (Heroku y Docker), primer acceso, checklist de configuración del BEER Lab, integración con oTree, respaldos y troubleshooting. |
-| [`Context/`](Context/) | Anteproyecto, canvas de negocio social y notas de reunión del BEER Lab. Ver [`Context/README.md`](Context/README.md). |
+| [`Context/`](Context/) | Anteproyecto, canvas de negocio social y notas de reunión del BEER Lab. |
+| [`resources/`](resources/) | Insumos: logotipo institucional y borrador del manual del laboratorio. |
 
 ## Configuración: todo por variables de entorno
 
