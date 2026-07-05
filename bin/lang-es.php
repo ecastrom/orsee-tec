@@ -71,6 +71,8 @@ foreach ([
     'support_mail'                   => 'ecastrom@tec.mx',
     'language_enabled_public'        => 'es,en',
     'language_enabled_participants'  => 'es,en',
+    'public_standard_language'       => 'es',   // default language for the public site
+    // admin_standard_language left as 'en' on purpose: admin UI stays English.
 ] as $name => $value) {
     $setopt->execute([':v' => $value, ':n' => $name]);
     fwrite(STDOUT, "[lang-es] option $name = $value (" . $setopt->rowCount() . " row)\n");
