@@ -60,13 +60,18 @@ $dbName = $db['name'];
 function out($m) { fwrite(STDOUT, "[demographics-es] $m\n"); }
 
 /* ---- which language columns does or_lang have? (en/de always; es after lang-es.php) ---- */
+// NB: alias the column — MySQL 8 returns information_schema headers UPPERCASE otherwise.
 $langCols = [];
-foreach ($pdo->query("SELECT column_name FROM information_schema.columns
+foreach ($pdo->query("SELECT column_name AS cname FROM information_schema.columns
                        WHERE table_schema = " . $pdo->quote($dbName) . "
                          AND table_name  = " . $pdo->quote($T_lang)) as $r) {
-    $langCols[] = $r['column_name'];
+    $langCols[] = $r['cname'];
 }
 $LANGS = array_values(array_intersect(['en', 'de', 'es'], $langCols));
+if (count($LANGS) === 0) {
+    fwrite(STDERR, "[demographics-es] FATAL: could not detect or_lang language columns — aborting before writing label-less options.\n");
+    exit(1);
+}
 out('or_lang language columns present: ' . implode(',', $LANGS));
 
 /* ---- load the two template fields we clone from ---- */
@@ -123,6 +128,37 @@ function option_exists(PDO $pdo, string $T_lang, string $contentType, string $va
     $s = $pdo->prepare("SELECT 1 FROM `$T_lang` WHERE content_type = :ct AND content_name = :cn LIMIT 1");
     $s->execute([':ct' => $contentType, ':cn' => $value]);
     return (bool) $s->fetchColumn();
+}
+/** Repair an existing option row whose language labels are NULL/empty
+ *  (left behind by a run that failed to detect the language columns). */
+function repair_option_labels(PDO $pdo, string $T_lang, array $LANGS, string $contentType,
+                              string $value, array $labels): bool {
+    $sel = $pdo->prepare("SELECT `" . implode('`,`', $LANGS) . "` FROM `$T_lang`
+                           WHERE content_type = :ct AND content_name = :cn LIMIT 1");
+    $sel->execute([':ct' => $contentType, ':cn' => $value]);
+    $row = $sel->fetch();
+    if (!$row) {
+        return false;
+    }
+    $allEmpty = true;
+    foreach ($LANGS as $lc) {
+        if (isset($row[$lc]) && trim((string) $row[$lc]) !== '') {
+            $allEmpty = false;
+            break;
+        }
+    }
+    if (!$allEmpty) {
+        return false;   // labels present (possibly customized) — leave untouched
+    }
+    $sets = [];
+    $args = [':ct' => $contentType, ':cn' => $value];
+    foreach ($LANGS as $lc) {
+        $sets[] = "`$lc` = :$lc";
+        $args[':' . $lc] = $labels[$lc] ?? ($labels['en'] ?? '');
+    }
+    $pdo->prepare("UPDATE `$T_lang` SET " . implode(', ', $sets) . "
+                    WHERE content_type = :ct AND content_name = :cn")->execute($args);
+    return true;
 }
 function insert_option(PDO $pdo, string $T_lang, array $LANGS, string $contentType,
                        string $value, int $order, array $labels): void {
@@ -239,6 +275,8 @@ try {
             if (!option_exists($pdo, $T_lang, $col, $val)) {
                 insert_option($pdo, $T_lang, $LANGS, $col, $val, $order, $opt);
                 out("$col: added option '$val'");
+            } elseif (repair_option_labels($pdo, $T_lang, $LANGS, $col, $val, $opt)) {
+                out("$col: repaired empty labels on option '$val'");
             }
             $order++;
         }
