@@ -1,0 +1,102 @@
+# Respaldo nocturno de la base de datos ORSEE (JawsDB) via GitHub Actions.
+#
+# Cada noche vuelca la base completa, verifica su integridad, la cifra (AES-256)
+# y la guarda como artefacto del repositorio con 90 días de retención. Con esto,
+# perder JawsDB (o un borrado accidental) cuesta como máximo 24 h de datos.
+#
+# SECRETS REQUERIDOS (Settings -> Secrets and variables -> Actions):
+#   JAWSDB_URL         la URL de conexión tal cual la da Heroku:
+#                        heroku config:get JAWSDB_URL -a orsee-beerlab
+#   BACKUP_PASSPHRASE  frase de cifrado de los respaldos. Generar p. ej. con:
+#                        openssl rand -base64 24
+#                      GUARDARLA EN UN LUGAR SEGURO (p. ej. gestor de contraseñas
+#                      del lab): sin ella los respaldos no se pueden descifrar.
+#
+# Restauración: ver docs/Respaldos_nocturnos.md
+#
+# Nota: GitHub pausa los workflows con cron si el repo pasa 60 días sin
+# actividad; GitHub avisa por correo antes. Reactivar es un clic en Actions.
+
+name: db-backup
+
+on:
+  schedule:
+    - cron: '23 8 * * *'   # 08:23 UTC = 02:23 America/Monterrey
+  workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Verificar secrets
+        env:
+          DB_URL: ${{ secrets.JAWSDB_URL }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          missing=0
+          [ -z "$DB_URL" ] && { echo "::error::Falta el secret JAWSDB_URL (heroku config:get JAWSDB_URL -a orsee-beerlab)"; missing=1; }
+          [ -z "$PASSPHRASE" ] && { echo "::error::Falta el secret BACKUP_PASSPHRASE (openssl rand -base64 24)"; missing=1; }
+          exit $missing
+
+      - name: Volcar la base de datos
+        env:
+          DB_URL: ${{ secrets.JAWSDB_URL }}
+        run: |
+          set -euo pipefail
+          eval "$(python3 - <<'PY'
+          import os, urllib.parse as up
+          u = up.urlsplit(os.environ['DB_URL'])
+          print(f"DB_HOST='{u.hostname}'")
+          print(f"DB_PORT='{u.port or 3306}'")
+          print(f"DB_USER='{up.unquote(u.username or '')}'")
+          print(f"DB_PASS='{up.unquote(u.password or '')}'")
+          print(f"DB_NAME='{u.path.lstrip('/')}'")
+          PY
+          )"
+          STAMP=$(date -u +%Y-%m-%d_%H%M)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          # Flags pensados para el usuario restringido de JawsDB (sin PROCESS ni
+          # tablespaces). Si el cliente/servidor no acepta los flags extra de
+          # Oracle mysqldump, reintenta con el conjunto base.
+          dump() { MYSQL_PWD="$DB_PASS" mysqldump -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" \
+                     --single-transaction --quick --no-tablespaces --triggers "$@" "$DB_NAME"; }
+          if ! dump --set-gtid-purged=OFF --column-statistics=0 > backup.sql 2>dump.err; then
+            echo "Primer intento falló ($(tail -1 dump.err)); reintentando con flags base..."
+            dump > backup.sql
+          fi
+          gzip -9 backup.sql
+          mv backup.sql.gz "orsee-backup-$STAMP.sql.gz"
+          ls -la "orsee-backup-$STAMP.sql.gz"
+
+      - name: Verificar integridad del volcado
+        run: |
+          set -euo pipefail
+          TABLES=$(zcat "orsee-backup-$STAMP.sql.gz" | grep -c "^CREATE TABLE" || true)
+          COMPLETED=$(zcat "orsee-backup-$STAMP.sql.gz" | tail -5 | grep -c "Dump completed" || true)
+          echo "Tablas: $TABLES · Marca de fin: $COMPLETED"
+          if [ "$TABLES" -lt 20 ] || [ "$COMPLETED" -ne 1 ]; then
+            echo "::error::El volcado parece incompleto (tablas=$TABLES, fin=$COMPLETED). NO se sube."
+            exit 1
+          fi
+
+      - name: Cifrar (AES-256)
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+              --passphrase "$PASSPHRASE" \
+              -o "orsee-backup-$STAMP.sql.gz.gpg" "orsee-backup-$STAMP.sql.gz"
+          shred -u "orsee-backup-$STAMP.sql.gz"
+
+      - name: Guardar artefacto (90 días)
+        uses: actions/upload-artifact@v4
+        with:
+          name: orsee-backup-${{ env.STAMP }}
+          path: orsee-backup-${{ env.STAMP }}.sql.gz.gpg
+          retention-days: 90
+          if-no-files-found: error
