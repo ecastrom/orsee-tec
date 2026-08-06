@@ -127,8 +127,8 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 
 ## Pending / next steps
 - [ ] First-login hardening: change `orsee_install` password + email (DEPLOYMENT.md §5).
-- [ ] In admin UI set Options → General Settings → System support email address to
-      beer.tec.mx@gmail.com (matches the Gmail sending account).
+- [x] Support email: now lab.economia@servicios.tec.mx (set by
+      bin/correo-institucional.php, 2026-08-06 — see institutional email section).
 - [ ] BEER Lab initial config: labs, subpools, participant fields, Spanish templates
       (DEPLOYMENT.md §6).
 - [ ] Push commits to GitHub `origin` too (2cfe9cf DirectoryIndex fix + c2a66ea
@@ -169,28 +169,17 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
     branch:main). bin/correo-institucional.php ran OK → support_mail switched.
   - DONE: config:set ORSEE_SMTP_HOST/PORT/SECURE/AUTH_TYPE/USER (office365,
     587, tls, password, lab.economia@servicios.tec.mx) → release v34.
-  - **PENDING (exact next steps):**
-    1. Re-set the password var — the first attempt used the literal
-       placeholder "<contraseña del buzón>":
-       heroku config:set -a orsee-beerlab ORSEE_SMTP_PASS="<real mailbox pw>"
-       Verify: heroku config:get ORSEE_SMTP_HOST ORSEE_SMTP_USER -a orsee-beerlab
-       (config:set output can show stale values while the release-phase
-       command runs — not an error.)
-    2. heroku run "php bin/test-mail.php <recipient>" -a orsee-beerlab
-       Success → mail arrives From: lab.economia@servicios.tec.mx. Done.
-    3. If "535 5.7.139 ... basic authentication is disabled" → OAuth2 route:
-       ask DTI for Entra ID app (delegated SMTP.Send + offline_access,
-       redirect URI https://orsee-beerlab-d86d8a0b91dc.herokuapp.com/admin/options_oauth_tokens.php)
-       + Authenticated SMTP enabled on the mailbox; set ORSEE_SMTP_AUTH_TYPE=oauth2
-       + ORSEE_SMTP_OAUTH_{PROVIDER=microsoft,IDENTITY,CLIENT_ID,CLIENT_SECRET,TENANT};
-       one-time consent in /admin/options_oauth_tokens.php logged in AS the
-       lab mailbox. Copy-paste DTI request text: docs/Correo_institucional.md.
-    4. After the test passes: revoke the old Gmail app password (exposed in
-       terminal output) in beer.tec.mx@gmail.com → Security → App passwords.
-       Gmail vars were overwritten in place, nothing to unset.
-    5. Merge this branch into GitHub main so GitHub and Heroku don't drift.
-  - Sending as Gmail is BROKEN as of v34 (USER/HOST switched, pass is the
-    placeholder) — finish step 1-2 promptly or the mail queue will fail.
+  - DONE 2026-08-06: user set the real ORSEE_SMTP_PASS (placeholder replaced).
+  - DONE 2026-08-06: end-to-end test passed via
+    `heroku run "php bin/test-mail.php ecastrom71@gmail.com" -a orsee-beerlab`:
+    smtp.office365.com STARTTLS, AUTH LOGIN → 235 Authentication successful,
+    250 2.0.0 OK. **Basic auth works on this mailbox — OAuth2 route NOT needed**
+    (docs/Correo_institucional.md keeps the OAuth2/DTI fallback if Tec ever
+    disables basic auth: watch for "535 5.7.139" in the cron mail log).
+  - DONE 2026-08-06: branch merged into main and pushed to GitHub origin.
+  - **PENDING (user, manual):** revoke the old Gmail app password (it was
+    exposed in terminal output) in beer.tec.mx@gmail.com → Security →
+    App passwords. Gmail SMTP vars were overwritten in place, nothing to unset.
 
 ## Payments (Amazon) + Mexican flag (v19-v20)
 - Payments: rules + FAQ 60007 now state payment as Amazon gift credits (or equivalent
