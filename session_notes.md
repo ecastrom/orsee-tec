@@ -180,6 +180,14 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
   - **PENDING (user, manual):** revoke the old Gmail app password (it was
     exposed in terminal output) in beer.tec.mx@gmail.com → Security →
     App passwords. Gmail SMTP vars were overwritten in place, nothing to unset.
+  - From display name (2026-08-06): first test showed bare "lab.economia" as
+    sender and landed in Gmail spam. Added ORSEE_MAIL_FROM_NAME env var
+    (settings.php → $settings__phpmailer_from_name, used by setFrom in
+    experimentmail.php — VENDORED EDIT, re-apply on upgrade). Heroku var set
+    to "Laboratorio de Economía Conductual y Experimental" (v38).
+    Spam-mitigation notes: name helps but reputation is the main driver —
+    new sender + bare test text is spam-prone; mark "No es spam" on first
+    real mails; if it persists ask DTI to publish DKIM for servicios.tec.mx.
 
 ## Payments (Amazon) + Mexican flag (v19-v20)
 - Payments: rules + FAQ 60007 now state payment as Amazon gift credits (or equivalent

@@ -165,6 +165,7 @@ $settings__phpmailer_username    = orsee_env('ORSEE_SMTP_USER', '');
 $settings__phpmailer_password    = orsee_env('ORSEE_SMTP_PASS', '');
 $settings__phpmailer_timeout     = (int) orsee_env('ORSEE_SMTP_TIMEOUT', '15');
 $settings__phpmailer_debug       = orsee_env('ORSEE_SMTP_DEBUG', 'n'); // y/n
+$settings__phpmailer_from_name   = orsee_env('ORSEE_MAIL_FROM_NAME', ''); // display name for the From header
 
 // OAuth2 identities (only used when ORSEE_SMTP_AUTH_TYPE=oauth2).
 $settings__phpmailer_smtp_oauth_identities = array(

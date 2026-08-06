@@ -630,7 +630,8 @@ namespace {
     function experimentmail__send_via_phpmailer($recipient,$subject,$message,$headers,$env_sender="",$attachments=array()) {
         global $settings, $settings__phpmailer_host, $settings__phpmailer_port,
         $settings__phpmailer_smtp_secure, $settings__phpmailer_username,
-        $settings__phpmailer_password, $settings__phpmailer_timeout;
+        $settings__phpmailer_password, $settings__phpmailer_timeout,
+        $settings__phpmailer_from_name;
 
         try {
             $mailer = new PHPMailer\PHPMailer\PHPMailer(true);
@@ -669,7 +670,8 @@ namespace {
             if (!$from_address || !filter_var($from_address,FILTER_VALIDATE_EMAIL)) {
                 return false;
             }
-            $mailer->setFrom($from_address);
+            $from_name=(isset($settings__phpmailer_from_name)) ? (string)$settings__phpmailer_from_name : "";
+            $mailer->setFrom($from_address,$from_name);
             $mailer->Sender=$from_address;
 
             $smtp_auth_type=experimentmail__phpmailer_smtp_auth_type();

@@ -98,7 +98,8 @@ heroku config:set -a orsee-beerlab \
   ORSEE_SMTP_SECURE="tls" \
   ORSEE_SMTP_AUTH_TYPE="password" \
   ORSEE_SMTP_USER="lab.economia@servicios.tec.mx" \
-  ORSEE_SMTP_PASS="<contraseña del buzón>"
+  ORSEE_SMTP_PASS="<contraseña del buzón>" \
+  ORSEE_MAIL_FROM_NAME="Laboratorio de Economía Conductual y Experimental"
 # Si la autenticación básica está deshabilitada en el tenant, usar OAuth2
 # (ORSEE_SMTP_AUTH_TYPE=oauth2 + registro en Entra ID): ver la guía.
 ```
