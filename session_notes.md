@@ -185,6 +185,8 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
     (settings.php → $settings__phpmailer_from_name, used by setFrom in
     experimentmail.php — VENDORED EDIT, re-apply on upgrade). Heroku var set
     to "Laboratorio de Economía Conductual y Experimental" (v38).
+    Verified 2026-08-06: user confirmed mail arrives with the correct
+    display name.
     Spam-mitigation notes: name helps but reputation is the main driver —
     new sender + bare test text is spam-prone; mark "No es spam" on first
     real mails; if it persists ask DTI to publish DKIM for servicios.tec.mx.
