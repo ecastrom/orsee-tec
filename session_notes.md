@@ -146,6 +146,33 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
   (Bash runs in a sandbox that can't resolve those hosts at all). `heroku` API commands
   (create/config/addons) work from either.
 
+## Institutional email account (branch claude/institutional-account-setup-yqgcx6)
+- Tec granted the lab **lab.economia@servicios.tec.mx**. Verified 2026-08-06:
+  servicios.tec.mx is Exchange Online (MX servicios-tec-mx.mail.protection.outlook.com,
+  SPF include:spf.protection.outlook.com -all) → must send via smtp.office365.com
+  authenticated as that mailbox; From must equal the authed mailbox.
+- Repo changes: bin/correo-institucional.php (sets support_mail -> institutional
+  address + forces experiment sender = support_mail, prints env summary);
+  bin/test-mail.php rewritten to use ORSEE's real send path (cronheader bootstrap,
+  experimentmail__send, supports password AND oauth2 incl. DB-stored tokens,
+  secrets redacted in SMTP log); lang-es.php support_mail updated to the
+  institutional address (so re-runs don't revert); DEPLOYMENT.md SMTP section
+  updated; full runbook in docs/Correo_institucional.md.
+- ORSEE 3.4.0 already ships M365 OAuth2 SMTP (XOAUTH2): admin consent page
+  /admin/options_oauth_tokens.php stores refresh tokens in or_oauth_tokens
+  (table exists — came with install.sql). Provider 'microsoft' auto-derives
+  endpoints + scopes (offline_access + outlook.office.com/SMTP.Send).
+- LIVE STEPS PENDING (need Heroku access + mailbox credentials):
+  1. heroku run "php bin/correo-institucional.php"
+  2. Try password route (smtp.office365.com:587 tls, AUTH_TYPE=password);
+     if 535/basic-auth-disabled → OAuth2 route: ask DTI for Entra ID app
+     (delegated SMTP.Send + offline_access, redirect URI
+     https://orsee-beerlab-d86d8a0b91dc.herokuapp.com/admin/options_oauth_tokens.php)
+     + SMTP AUTH enabled on the mailbox; set ORSEE_SMTP_OAUTH_* vars; consent
+     via admin page logged in as the lab mailbox.
+  3. heroku run "php bin/test-mail.php <to>" — then remove Gmail vars.
+  Keep Gmail (beer.tec.mx@gmail.com) sending until the test passes.
+
 ## Payments (Amazon) + Mexican flag (v19-v20)
 - Payments: rules + FAQ 60007 now state payment as Amazon gift credits (or equivalent
   electronic voucher). Added payments_type '2' = "Amazon credit"/"Crédito Amazon";

@@ -12,7 +12,7 @@
  *   3. Applies the participant-facing Spanish translations from
  *      bin/es_translations.json (keyed by or_lang.lang_id).
  *   4. Sets the language display name to "Español".
- *   5. Updates or_options: support_mail -> ecastrom@tec.mx, and the enabled
+ *   5. Updates or_options: support_mail -> lab.economia@servicios.tec.mx, and the enabled
  *      public/participant languages to "es,en" (first entry = default => Spanish).
  *      German (de) stays as data but is no longer offered.
  *
@@ -74,7 +74,9 @@ $pdo->exec("UPDATE `$lang` SET `es` = 'Español'
 /* 4. options: support email + enabled languages (Spanish first = default) --- */
 $setopt = $pdo->prepare("UPDATE `$options` SET option_value = :v WHERE option_name = :n");
 foreach ([
-    'support_mail'                   => 'ecastrom@tec.mx',
+    // Cuenta institucional del laboratorio (M365). Debe coincidir con el buzon
+    // autenticado en SMTP — ver docs/Correo_institucional.md y bin/correo-institucional.php.
+    'support_mail'                   => 'lab.economia@servicios.tec.mx',
     'language_enabled_public'        => 'es,en',
     'language_enabled_participants'  => 'es,en',
     'public_standard_language'       => 'es',   // default language for the public site

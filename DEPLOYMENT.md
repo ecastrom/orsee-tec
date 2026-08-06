@@ -85,16 +85,22 @@ heroku config:set -a orsee-beerlab \
 > `heroku domains:add`.
 
 **Correo saliente (SMTP).** Los dynos de Heroku no tienen servidor de correo, así
-que hay que usar un relay SMTP. Con SendGrid:
+que hay que usar un relay SMTP autenticado. El BEER Lab usa la **cuenta
+institucional `lab.economia@servicios.tec.mx`** (Microsoft 365) vía
+`smtp.office365.com` — la guía completa (contraseña vs OAuth2, prueba y
+limpieza) está en [`docs/Correo_institucional.md`](docs/Correo_institucional.md).
+Configuración resumida:
 
 ```bash
-heroku addons:create sendgrid:starter -a orsee-beerlab   # o usa tu relay del Tec
 heroku config:set -a orsee-beerlab \
-  ORSEE_SMTP_HOST="smtp.sendgrid.net" \
+  ORSEE_SMTP_HOST="smtp.office365.com" \
   ORSEE_SMTP_PORT="587" \
   ORSEE_SMTP_SECURE="tls" \
-  ORSEE_SMTP_USER="apikey" \
-  ORSEE_SMTP_PASS="<TU_API_KEY_DE_SENDGRID>"
+  ORSEE_SMTP_AUTH_TYPE="password" \
+  ORSEE_SMTP_USER="lab.economia@servicios.tec.mx" \
+  ORSEE_SMTP_PASS="<contraseña del buzón>"
+# Si la autenticación básica está deshabilitada en el tenant, usar OAuth2
+# (ORSEE_SMTP_AUTH_TYPE=oauth2 + registro en Entra ID): ver la guía.
 ```
 
 ### 3.3. Desplegar
