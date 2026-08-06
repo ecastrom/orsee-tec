@@ -3,6 +3,7 @@
  * One-off SMTP diagnostic for the BEER Lab ORSEE deployment.
  *
  *   heroku run "php bin/test-mail.php you@example.com" -a orsee-beerlab
+ *   heroku run "php bin/test-mail.php you@example.com 'optional note'" -a orsee-beerlab
  *
  * Sends a single test message through ORSEE's REAL outgoing-mail path
  * (orsee/tagsets/experimentmail.php): same PHPMailer, same ORSEE_SMTP_* config
@@ -54,6 +55,10 @@ $subject = 'ORSEE SMTP test - ' . date('Y-m-d H:i:s T');
 $body    = "This is a test from the BEER Lab ORSEE deployment.\n" .
            "Transport: PHPMailer/SMTP, auth type: $auth_type.\n" .
            "If you received it, ORSEE's outgoing mail path works.\n";
+$note    = trim($argv[2] ?? '');
+if ($note !== '') {
+    $body .= "\n" . $note . "\n";
+}
 
 $ok = experimentmail__send($to, $subject, $body, "");
 
