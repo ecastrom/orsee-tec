@@ -127,8 +127,8 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 
 ## Pending / next steps
 - [ ] First-login hardening: change `orsee_install` password + email (DEPLOYMENT.md §5).
-- [ ] In admin UI set Options → General Settings → System support email address to
-      beer.tec.mx@gmail.com (matches the Gmail sending account).
+- [x] Support email: now lab.economia@servicios.tec.mx (set by
+      bin/correo-institucional.php, 2026-08-06 — see institutional email section).
 - [ ] BEER Lab initial config: labs, subpools, participant fields, Spanish templates
       (DEPLOYMENT.md §6).
 - [ ] Push commits to GitHub `origin` too (2cfe9cf DirectoryIndex fix + c2a66ea
@@ -145,6 +145,41 @@ scheduling) for the **BEER Lab**, Tec de Monterrey. ORSEE code is vendored in
 - Run heroku **git push / logs from PowerShell** (host network), not the Bash tool
   (Bash runs in a sandbox that can't resolve those hosts at all). `heroku` API commands
   (create/config/addons) work from either.
+
+## Institutional email account (branch claude/institutional-account-setup-yqgcx6)
+- Tec granted the lab **lab.economia@servicios.tec.mx**. Verified 2026-08-06:
+  servicios.tec.mx is Exchange Online (MX servicios-tec-mx.mail.protection.outlook.com,
+  SPF include:spf.protection.outlook.com -all) → must send via smtp.office365.com
+  authenticated as that mailbox; From must equal the authed mailbox.
+- Repo changes: bin/correo-institucional.php (sets support_mail -> institutional
+  address + forces experiment sender = support_mail, prints env summary);
+  bin/test-mail.php rewritten to use ORSEE's real send path (cronheader bootstrap,
+  experimentmail__send, supports password AND oauth2 incl. DB-stored tokens,
+  secrets redacted in SMTP log); lang-es.php support_mail updated to the
+  institutional address (so re-runs don't revert); DEPLOYMENT.md SMTP section
+  updated; full runbook in docs/Correo_institucional.md.
+- ORSEE 3.4.0 already ships M365 OAuth2 SMTP (XOAUTH2): admin consent page
+  /admin/options_oauth_tokens.php stores refresh tokens in or_oauth_tokens
+  (table exists — came with install.sql). Provider 'microsoft' auto-derives
+  endpoints + scopes (offline_access + outlook.office.com/SMTP.Send).
+- LIVE PROGRESS 2026-08-06 (user driving Heroku from PowerShell; agent had no
+  Heroku access → next session may run locally WITH heroku CLI + repo access):
+  - DONE: branch deployed to Heroku (local clone C:\Users\ecast\Documents\orsee-tec;
+    heroku remote re-added via `heroku git:remote -a orsee-beerlab`; pushed
+    branch:main). bin/correo-institucional.php ran OK → support_mail switched.
+  - DONE: config:set ORSEE_SMTP_HOST/PORT/SECURE/AUTH_TYPE/USER (office365,
+    587, tls, password, lab.economia@servicios.tec.mx) → release v34.
+  - DONE 2026-08-06: user set the real ORSEE_SMTP_PASS (placeholder replaced).
+  - DONE 2026-08-06: end-to-end test passed via
+    `heroku run "php bin/test-mail.php ecastrom71@gmail.com" -a orsee-beerlab`:
+    smtp.office365.com STARTTLS, AUTH LOGIN → 235 Authentication successful,
+    250 2.0.0 OK. **Basic auth works on this mailbox — OAuth2 route NOT needed**
+    (docs/Correo_institucional.md keeps the OAuth2/DTI fallback if Tec ever
+    disables basic auth: watch for "535 5.7.139" in the cron mail log).
+  - DONE 2026-08-06: branch merged into main and pushed to GitHub origin.
+  - **PENDING (user, manual):** revoke the old Gmail app password (it was
+    exposed in terminal output) in beer.tec.mx@gmail.com → Security →
+    App passwords. Gmail SMTP vars were overwritten in place, nothing to unset.
 
 ## Payments (Amazon) + Mexican flag (v19-v20)
 - Payments: rules + FAQ 60007 now state payment as Amazon gift credits (or equivalent

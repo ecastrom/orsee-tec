@@ -34,7 +34,8 @@ el trabajo de las otras).
 
 | Script | Qué hace |
 |---|---|
-| `test-mail.php` | Diagnóstico SMTP: envía un correo de prueba con el mismo PHPMailer y las mismas variables `ORSEE_SMTP_*` que usa la aplicación. `php bin/test-mail.php destinatario@dominio`. |
+| `test-mail.php` | Diagnóstico SMTP: envía un correo de prueba por la **ruta real de envío de ORSEE** (`experimentmail.php`: mismo PHPMailer, `From:` = `support_mail`, y con `oauth2` los tokens guardados en `or_oauth_tokens`). Imprime la conversación SMTP con secretos censurados. `php bin/test-mail.php destinatario@dominio`. |
+| `correo-institucional.php` | Cambia la identidad de envío a la cuenta institucional (`support_mail` → `lab.economia@servicios.tec.mx`, remitente de experimentos forzado a esa cuenta) e imprime las variables `ORSEE_SMTP_*` vigentes. Ver `docs/Correo_institucional.md`. |
 | `reset-admin-pw.php` | Restablece la contraseña de un admin a un valor aleatorio de un solo uso (impreso solo en el log) y fuerza el cambio en el siguiente login. `php bin/reset-admin-pw.php <adminname>`. |
 | `self-host.md`, `ubuntu-install.md` | Guías para autoalojamiento (Docker/VPS/Ubuntu). |
 
